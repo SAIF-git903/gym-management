@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { api } from '@/lib/api/client'
 import { PLANS } from '@/constants/plans'
+import { formatPKR } from '@/lib/formatPKR'
 
 export default function MembersPage() {
   const [rows, setRows] = useState([])
@@ -149,6 +150,8 @@ export default function MembersPage() {
                 <th className="px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300">Name</th>
                 <th className="px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300">Contact</th>
                 <th className="px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300">Plan</th>
+                <th className="px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300">Fee</th>
+                <th className="px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300">Blood</th>
                 <th className="px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300">Period</th>
                 <th className="px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300">Payment</th>
                 <th className="max-w-[200px] px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300">
@@ -161,13 +164,13 @@ export default function MembersPage() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-zinc-500">
+                  <td colSpan={10} className="px-4 py-12 text-center text-zinc-500">
                     Loading…
                   </td>
                 </tr>
               ) : rows.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-zinc-500">
+                  <td colSpan={10} className="px-4 py-12 text-center text-zinc-500">
                     No members found.
                   </td>
                 </tr>
@@ -178,11 +181,29 @@ export default function MembersPage() {
                       {m.name}
                     </td>
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
-                      <div>{m.email}</div>
+                      <div>
+                        {m.email?.trim() ? (
+                          m.email
+                        ) : (
+                          <span className="text-zinc-400 dark:text-zinc-500">—</span>
+                        )}
+                      </div>
                       <div className="text-xs">{m.phone}</div>
                     </td>
                     <td className="px-4 py-3 capitalize text-zinc-700 dark:text-zinc-300">
                       {m.plan?.replace('-', ' ')}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 font-medium text-zinc-800 dark:text-zinc-200">
+                      {formatPKR(m.membershipFee)}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                      {m.bloodGroup ? (
+                        <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                          {m.bloodGroup}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
                     </td>
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
                       <div className="whitespace-nowrap text-xs">

@@ -66,7 +66,7 @@ There is **no** register endpoint; create the owner with `npm run create-owner`.
 
 ### POST `/api/members`
 
-**Body:** `name`, `phone`, `email`, optional `address`, `notes` (max 5000), `plan`, `startDate`, `endDate` (ISO), optional `paymentStatus`.
+**Body:** `name`, `phone`, optional `email` (omit or empty if none; if set, must be valid), optional `address`, `notes` (max 5000), optional `membershipFee` (non‑negative number in **PKR**, default `0`), optional `bloodGroup` (`''` or `A+`, `A-`, `B+`, `B-`, `AB+`, `AB-`, `O+`, `O-`), `plan`, `startDate`, `endDate` (ISO), optional `paymentStatus`.
 
 ### PUT `/api/members/:id`
 

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import FormField from '@/components/ui/FormField'
 import { PLANS, PAYMENT_STATUSES } from '@/constants/plans'
+import { BLOOD_GROUPS } from '@/constants/bloodGroups'
+import { formatPKR } from '@/lib/formatPKR'
 
 const empty = {
   name: '',
@@ -11,6 +13,8 @@ const empty = {
   email: '',
   address: '',
   notes: '',
+  membershipFee: '',
+  bloodGroup: '',
   plan: 'monthly',
   startDate: '',
   endDate: '',
@@ -37,6 +41,11 @@ export default function MemberForm({ initial, onSubmit, submitLabel, error: apiE
         email: initial.email ?? '',
         address: initial.address ?? '',
         notes: initial.notes ?? '',
+        membershipFee:
+          initial.membershipFee != null && initial.membershipFee !== ''
+            ? String(initial.membershipFee)
+            : '',
+        bloodGroup: initial.bloodGroup ?? '',
         plan: initial.plan ?? 'monthly',
         startDate: toInputDate(initial.startDate),
         endDate: toInputDate(initial.endDate),
@@ -56,14 +65,19 @@ export default function MemberForm({ initial, onSubmit, submitLabel, error: apiE
     const e = {}
     if (!values.name.trim()) e.name = 'Name is required'
     if (!values.phone.trim()) e.phone = 'Phone is required'
-    if (!values.email.trim()) e.email = 'Email is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) e.email = 'Invalid email'
+    if (values.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
+      e.email = 'Invalid email'
+    }
     if (!values.startDate) e.startDate = 'Start date is required'
     if (!values.endDate) e.endDate = 'End date is required'
     if (values.startDate && values.endDate && values.endDate < values.startDate) {
       e.endDate = 'End date must be on or after start date'
     }
     if (values.notes.length > 5000) e.notes = 'Notes must be at most 5000 characters'
+    if (values.membershipFee !== '') {
+      const n = Number.parseFloat(values.membershipFee)
+      if (Number.isNaN(n) || n < 0) e.membershipFee = 'Enter a valid fee (0 or more)'
+    }
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -75,6 +89,8 @@ export default function MemberForm({ initial, onSubmit, submitLabel, error: apiE
     try {
       const payload = {
         ...values,
+        email: values.email.trim(),
+        membershipFee: values.membershipFee === '' ? 0 : Number.parseFloat(values.membershipFee),
         startDate: new Date(values.startDate).toISOString(),
         endDate: new Date(values.endDate).toISOString(),
       }
@@ -103,13 +119,46 @@ export default function MemberForm({ initial, onSubmit, submitLabel, error: apiE
         <FormField label="Phone" error={errors.phone}>
           <input className={inputClass} value={values.phone} onChange={set('phone')} />
         </FormField>
-        <FormField label="Email" error={errors.email} className="sm:col-span-2">
+        <FormField
+          label="Email (optional)"
+          error={errors.email}
+          className="sm:col-span-2"
+        >
           <input
             type="email"
+            autoComplete="email"
+            placeholder="Leave blank if not available"
             className={inputClass}
             value={values.email}
             onChange={set('email')}
           />
+        </FormField>
+        <FormField label="Blood group">
+          <select className={inputClass} value={values.bloodGroup} onChange={set('bloodGroup')}>
+            {BLOOD_GROUPS.map((b) => (
+              <option key={b.value || 'none'} value={b.value}>
+                {b.label}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Membership fee (Rs)" error={errors.membershipFee}>
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            placeholder="e.g. 15000"
+            className={inputClass}
+            value={values.membershipFee}
+            onChange={set('membershipFee')}
+          />
+          {values.membershipFee !== '' &&
+            !Number.isNaN(Number.parseFloat(values.membershipFee)) &&
+            Number.parseFloat(values.membershipFee) >= 0 && (
+              <p className="mt-1 text-xs text-zinc-500">
+                ≈ {formatPKR(Number.parseFloat(values.membershipFee))}
+              </p>
+            )}
         </FormField>
         <FormField label="Address" className="sm:col-span-2">
           <textarea
