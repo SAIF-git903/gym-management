@@ -112,3 +112,4 @@ See [docs/API.md](docs/API.md) for endpoints, payloads, and query parameters.
 - Member `createdAt` / `updatedAt` come from Mongoose `timestamps`.
 - CORS is restricted to `CLIENT_URL` for browser requests.
 # gym-management
+# gym-management
