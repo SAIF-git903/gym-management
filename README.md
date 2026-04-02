@@ -1,115 +1,82 @@
-# Gym Management Web App
+# Gym Management (Next.js full stack)
 
-Full-stack gym app: **React (Vite) + Tailwind**, **Node.js + Express + MongoDB + Mongoose**, **JWT** auth. One **gym owner** account signs in; **members** are records you add in the app (no member self-sign-up).
+Single **Next.js** app: **App Router UI** + **Route Handlers** (`/api/*`) for the same server. Deploy **one** service (e.g. Vercel, Railway, Node host); **MongoDB** stays external.
 
-## Project structure
+## Stack
 
-```
-gym-management/
-├── backend/          # Express API (MVC)
-├── frontend/         # React SPA
-└── docs/
-    └── API.md        # REST API reference
-```
+- **Next.js 15** (React 19), **Tailwind CSS v4**
+- **Mongoose** + **JWT** + **bcrypt** (gym owner login; members are records only)
+- No separate Express or Vite app
 
-## Prerequisites
+## Setup
 
-- Node.js 18+
-- MongoDB running locally or a MongoDB Atlas connection string
-
-## Backend setup
-
-1. Copy environment file:
+1. **Install**
 
    ```bash
-   cd backend
-   copy .env.example .env
+   npm install
    ```
 
-   On macOS/Linux: `cp .env.example .env`
-
-2. Edit `backend/.env`:
-
-   - `MONGODB_URI` — your MongoDB URL
-   - `JWT_SECRET` — long random secret (required)
-   - `PORT` — default `5000`
-   - `CLIENT_URL` — frontend origin, default `http://localhost:5173`
-
-3. Install and run:
+2. **Environment** — copy `.env.example` to **`.env.local`** (Next loads this automatically):
 
    ```bash
-   cd backend
-   npm install
+   copy .env.example .env.local
+   ```
+
+   Set at least:
+
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+
+3. **Create the gym owner** (no sign-up in the app):
+
+   ```bash
+   npm run create-owner
+   ```
+
+   Set `OWNER_NAME`, `OWNER_EMAIL`, `OWNER_PASSWORD` in `.env.local`, or:
+
+   ```bash
+   node scripts/create-owner.mjs "Gym Owner" owner@example.com yourPassword
+   ```
+
+4. **Run**
+
+   ```bash
    npm run dev
    ```
 
-   API: `http://localhost:5000`
+   Open [http://localhost:3000](http://localhost:3000) → **Sign in** → Dashboard / Members.
 
-## Frontend setup
-
-1. Copy environment file:
-
-   ```bash
-   cd frontend
-   copy .env.example .env
-   ```
-
-2. Ensure `VITE_API_URL` matches your API (e.g. `http://localhost:5000`).
-
-3. Install and run:
-
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-   App: `http://localhost:5173`
-
-## First use — create the gym owner
-
-There is **no sign-up in the app**. Create the owner user in MongoDB once (password is stored bcrypt-hashed by the app).
-
-**Recommended:** from `backend/`, add `OWNER_NAME`, `OWNER_EMAIL`, and `OWNER_PASSWORD` to `.env` (see `.env.example`), then:
+## Production
 
 ```bash
-npm run create-owner
-```
-
-**Or** via CLI (same folder):
-
-```bash
-node scripts/create-owner.mjs "Gym Owner" owner@example.com yourSecurePassword
-```
-
-Then start the API, open the frontend, and **Sign in** with that email and password. Use **Members** to add gym members.
-
-## Features
-
-- JWT auth; member and dashboard routes require a valid gym-owner token (`POST /auth/login` only — no public register)
-- Members: create, list (table), edit, delete, search, filters (payment, plan, active/expired), pagination
-- Dashboard: totals, active/expired counts, simple revenue estimate from plan defaults, memberships expiring within 7 days
-- Responsive layout with sidebar; dark mode toggle (class on `<html>`)
-- Client-side form validation; server-side validation with `express-validator`
-
-## Production build (frontend)
-
-```bash
-cd frontend
 npm run build
-npm run preview
+npm start
 ```
 
-Serve the `frontend/dist` folder behind your static host or reverse proxy, and point `VITE_API_URL` at your deployed API.
+Set the same env vars on the host (`MONGODB_URI`, `JWT_SECRET`, optional `JWT_EXPIRES_IN`).
 
-## API documentation
+## Project layout
 
-See [docs/API.md](docs/API.md) for endpoints, payloads, and query parameters.
+```
+app/
+  api/           # REST handlers (auth, members, dashboard)
+  (dashboard)/   # Protected UI: /, /members, …
+  login/
+lib/
+  models/        # Mongoose User, Member
+  api/client.js  # Axios → same-origin /api
+components/
+context/
+scripts/create-owner.mjs
+docs/API.md
+```
 
-## Tech notes
+## API docs
 
-- Backend uses ES modules (`"type": "module"`).
-- Member `createdAt` / `updatedAt` come from Mongoose `timestamps`.
-- CORS is restricted to `CLIENT_URL` for browser requests.
-# gym-management
-# gym-management
+See [docs/API.md](docs/API.md). All routes are under **`/api`** (e.g. `POST /api/auth/login`).
+
+## Notes
+
+- **CORS**: not needed; the browser only talks to the same Next origin.
+- **Migrating from the old repo**: if you had `backend/.env`, copy its values into **`.env.local`** at the project root.

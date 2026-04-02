@@ -1,8 +1,8 @@
-# Gym Management API
+# Gym Management API (Next.js Route Handlers)
 
-Base URL: `http://localhost:5000` (or your `PORT`).
+Base URL: same as the app (e.g. `http://localhost:3000`). JSON endpoints live under **`/api`**.
 
-All authenticated routes require header:
+Authenticated requests need:
 
 ```http
 Authorization: Bearer <JWT>
@@ -14,7 +14,7 @@ Authorization: Bearer <JWT>
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/health` | No | Liveness check |
+| GET | `/api/health` | No | Liveness check |
 
 **Response:** `{ "ok": true }`
 
@@ -22,14 +22,14 @@ Authorization: Bearer <JWT>
 
 ## Authentication
 
-There is **no** `POST /auth/register`. The gym owner user is created in MongoDB (e.g. `npm run create-owner` in the backend — see project README).
-
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | `/auth/login` | No | Gym owner sign in |
-| GET | `/auth/me` | Yes | Current user profile |
+| POST | `/api/auth/login` | No | Gym owner sign in |
+| GET | `/api/auth/me` | Yes | Current user profile |
 
-### POST `/auth/login`
+There is **no** register endpoint; create the owner with `npm run create-owner`.
+
+### POST `/api/auth/login`
 
 **Body (JSON):**
 
@@ -42,7 +42,7 @@ There is **no** `POST /auth/register`. The gym owner user is created in MongoDB 
 
 **Errors:** `401` invalid credentials
 
-### GET `/auth/me`
+### GET `/api/auth/me`
 
 **Response `200`:** `{ user: { id, name, email, role } }`
 
@@ -52,68 +52,25 @@ There is **no** `POST /auth/register`. The gym owner user is created in MongoDB 
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/members` | List with pagination, search, filters |
-| GET | `/members/:id` | Single member |
-| POST | `/members` | Create member |
-| PUT | `/members/:id` | Update member |
-| DELETE | `/members/:id` | Delete member |
+| GET | `/api/members` | List with pagination, search, filters |
+| GET | `/api/members/:id` | Single member |
+| POST | `/api/members` | Create member |
+| PUT | `/api/members/:id` | Update member |
+| DELETE | `/api/members/:id` | Delete member |
 
-### GET `/members`
+### GET `/api/members`
 
-**Query parameters:**
+**Query:** `page`, `limit`, `search`, `paymentStatus`, `plan`, `membershipStatus` (same semantics as before).
 
-| Param | Description |
-|-------|-------------|
-| page | Page number (default `1`) |
-| limit | Page size (default `10`, max `100`) |
-| search | Substring match on name, email, phone |
-| paymentStatus | `paid` or `unpaid` |
-| plan | `monthly`, `quarterly`, `half-yearly`, `yearly` |
-| membershipStatus | `active` (endDate ≥ now) or `expired` |
+**Response `200`:** `{ data, pagination }`
 
-**Response `200`:**
+### POST `/api/members`
 
-```json
-{
-  "data": [ /* members */ ],
-  "pagination": {
-    "page": 1,
-    "limit": 10,
-    "total": 42,
-    "totalPages": 5
-  }
-}
-```
+**Body:** `name`, `phone`, `email`, optional `address`, `notes` (max 5000), `plan`, `startDate`, `endDate` (ISO), optional `paymentStatus`.
 
-### POST `/members`
+### PUT `/api/members/:id`
 
-**Body (JSON):**
-
-| Field | Type | Notes |
-|-------|------|--------|
-| name | string | required |
-| phone | string | required |
-| email | string | required |
-| address | string | optional |
-| notes | string | optional, internal (max 5000 chars); included in `search` |
-| plan | string | `monthly` \| `quarterly` \| `half-yearly` \| `yearly` |
-| startDate | string | ISO 8601 date |
-| endDate | string | ISO 8601 date |
-| paymentStatus | string | optional, `paid` \| `unpaid` (default `unpaid`) |
-
-**Response `201`:** created member document
-
-### PUT `/members/:id`
-
-Same fields as POST; all optional (only send fields to update).
-
-**Response `200`:** updated member
-
-**Errors:** `404` if not found
-
-### DELETE `/members/:id`
-
-**Response `200`:** `{ "message": "Member removed" }`
+Partial updates allowed.
 
 ---
 
@@ -121,25 +78,10 @@ Same fields as POST; all optional (only send fields to update).
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/dashboard/stats` | Counts, revenue estimate, expiring soon |
-
-**Response `200` (summary):**
-
-- `totalMembers`, `activeMembers`, `expiredMembers`, `paidMembersCount`
-- `revenueOverview`: `estimatedTotal`, `byPlan[]`, `note`
-- `expiringWithin7Days`: array of members with `endDate` within 7 days
+| GET | `/api/dashboard/stats` | Counts, revenue estimate, expiring soon |
 
 ---
 
-## Error format
+## Errors
 
-Validation errors often return `400`:
-
-```json
-{
-  "message": "Validation failed",
-  "errors": [ { "msg": "...", "path": "email", ... } ]
-}
-```
-
-Other errors return JSON `{ "message": "..." }` with appropriate status codes (`401`, `403`, `404`, `500`).
+Validation: `400` with `{ message, errors[] }`. Other errors: `{ message }` with appropriate status.
