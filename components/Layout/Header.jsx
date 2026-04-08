@@ -3,11 +3,13 @@
 import { useAuth } from '@/context/AuthContext'
 import ThemeToggleButton from '@/components/ThemeToggleButton'
 
-export default function Header({ onMenuClick }) {
+export default function Header({ onMenuClick, className = '' }) {
   const { user, logout } = useAuth()
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-zinc-200 bg-white px-4 dark:border-zinc-800 dark:bg-zinc-950 md:px-6">
+    <header
+      className={`flex h-14 shrink-0 items-center justify-between gap-4 border-b border-zinc-200 bg-white px-4 dark:border-zinc-800 dark:bg-zinc-950 md:px-6 ${className}`}
+    >
       <button
         type="button"
         className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 md:hidden dark:text-zinc-400 dark:hover:bg-zinc-800"

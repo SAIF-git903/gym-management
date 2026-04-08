@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import MemberForm from '@/components/MemberForm'
 import { api } from '@/lib/api/client'
@@ -60,9 +61,17 @@ export default function MemberEditPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Edit member</h2>
-        <p className="mt-1 text-sm text-zinc-500">Update details and membership</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Edit member</h2>
+          <p className="mt-1 text-sm text-zinc-500">Update details and membership</p>
+        </div>
+        <Link
+          href={`/members/${id}/receipt`}
+          className="inline-flex shrink-0 items-center justify-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        >
+          Print payment receipt
+        </Link>
       </div>
       <MemberForm
         initial={initial}
