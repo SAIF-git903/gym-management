@@ -11,6 +11,7 @@ export default function MembersPage() {
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [revenueOverview, setRevenueOverview] = useState(null)
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -36,6 +37,7 @@ export default function MembersPage() {
         const { data } = await api.get(`/api/members?${params}`)
         setRows(data.data)
         setPagination(data.pagination)
+        if (data.revenueOverview) setRevenueOverview(data.revenueOverview)
       } catch (e) {
         setError(e.response?.data?.message || 'Failed to load members')
       } finally {
@@ -135,6 +137,33 @@ export default function MembersPage() {
           </select>
         </div>
       </div>
+
+      {revenueOverview && (
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Revenue overview</h3>
+          <p className="mt-1 text-sm text-zinc-500">{revenueOverview.note}</p>
+          <p className="mt-4 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+            {formatPKR(revenueOverview.estimatedTotal ?? 0)}
+            <span className="ml-2 text-sm font-normal text-zinc-500">from paid members</span>
+          </p>
+          {revenueOverview.byPlan?.length > 0 && (
+            <ul className="mt-4 space-y-2 text-sm">
+              {revenueOverview.byPlan.map((row) => (
+                <li
+                  key={row.plan}
+                  className="flex justify-between border-b border-zinc-100 py-2 dark:border-zinc-800"
+                >
+                  <span className="capitalize text-zinc-700 dark:text-zinc-300">{row.plan}</span>
+                  <span className="text-zinc-500">
+                    {row.count} member{row.count !== 1 ? 's' : ''} ·{' '}
+                    {formatPKR(row.subtotal ?? 0)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {error && (
         <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
@@ -241,6 +270,12 @@ export default function MembersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
+                        <Link
+                          href={`/members/${m._id}/receipt`}
+                          className="text-zinc-700 hover:underline dark:text-zinc-300"
+                        >
+                          Receipt
+                        </Link>
                         <Link
                           href={`/members/${m._id}/edit`}
                           className="text-emerald-600 hover:underline dark:text-emerald-400"

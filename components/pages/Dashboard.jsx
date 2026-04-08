@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { api } from '@/lib/api/client'
-import { formatPKR } from '@/lib/formatPKR'
-
 function StatCard({ title, value, hint, tone = 'default' }) {
   const tones = {
     default: 'border-zinc-200 dark:border-zinc-800',
@@ -58,48 +56,18 @@ export default function Dashboard() {
     )
   }
 
-  const rev = stats?.revenueOverview
-
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Dashboard</h2>
-        <p className="mt-1 text-sm text-zinc-500">Overview of members and revenue</p>
+        <p className="mt-1 text-sm text-zinc-500">Overview of members</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total members" value={stats.totalMembers} />
         <StatCard title="Active memberships" value={stats.activeMembers} tone="success" />
         <StatCard title="Expired" value={stats.expiredMembers} tone="warning" />
-        <StatCard
-          title="Paid members"
-          value={stats.paidMembersCount}
-          hint="Used in revenue estimate"
-        />
-      </div>
-
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Revenue overview</h3>
-        <p className="mt-1 text-sm text-zinc-500">{rev?.note}</p>
-        <p className="mt-4 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-          {formatPKR(rev?.estimatedTotal ?? 0)}
-          <span className="ml-2 text-sm font-normal text-zinc-500">from paid members</span>
-        </p>
-        {rev?.byPlan?.length > 0 && (
-          <ul className="mt-4 space-y-2 text-sm">
-            {rev.byPlan.map((row) => (
-              <li
-                key={row.plan}
-                className="flex justify-between border-b border-zinc-100 py-2 dark:border-zinc-800"
-              >
-                <span className="capitalize text-zinc-700 dark:text-zinc-300">{row.plan}</span>
-                <span className="text-zinc-500">
-                  {row.count} member{row.count !== 1 ? 's' : ''} · {formatPKR(row.subtotal ?? 0)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <StatCard title="Paid members" value={stats.paidMembersCount} />
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">

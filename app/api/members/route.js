@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
 import { Member } from '@/lib/models/Member'
 import { requireOwner } from '@/lib/auth'
-import { listMembers } from '@/lib/member-service'
+import { getRevenueOverview, listMembers } from '@/lib/member-service'
 import { validateMemberCreate } from '@/lib/member-validation'
 
 export async function GET(request) {
@@ -12,8 +12,11 @@ export async function GET(request) {
     if (auth.response) return auth.response
 
     const { searchParams } = new URL(request.url)
-    const result = await listMembers(searchParams)
-    return NextResponse.json(result)
+    const [result, revenueOverview] = await Promise.all([
+      listMembers(searchParams),
+      getRevenueOverview(),
+    ])
+    return NextResponse.json({ ...result, revenueOverview })
   } catch (err) {
     console.error(err)
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
