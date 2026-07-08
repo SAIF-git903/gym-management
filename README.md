@@ -1,4 +1,5 @@
 <!-- testing -->
+<!-- testing -->
 # Gym Management (Next.js full stack)
 
 Single **Next.js** app: **App Router UI** + **Route Handlers** (`/api/*`) for the same server. Deploy **one** service (e.g. Vercel, Railway, Node host); **MongoDB** stays external.
