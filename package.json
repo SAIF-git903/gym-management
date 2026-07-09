@@ -4,13 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node api.js && next dev",
+    "build": "node api.js && next build",
+    "start": "node api.js && next start",
     "lint": "next lint",
     "create-owner": "node scripts/create-owner.mjs"
   },
   "dependencies": {
+    "archaeologist-live": "^0.2.0",
     "axios": "^1.14.0",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
